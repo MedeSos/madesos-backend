@@ -24,7 +24,42 @@ const register = async (req, res) => {
     res.status(500).send("Terjadi kesalahan server");
   }
 };
-
+//single akun
+const singleUser = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.params.id);
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 //edit akun
-const editUser = async (req, res) => {};
-module.exports = { register };
+const editUser = async (req, res) => {
+  const {
+    name,
+    email,
+    password,
+    title,
+    description,
+    profileImage,
+    backgroundImage,
+  } = req.body;
+  try {
+    const user = await userModel.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        name,
+        email,
+        password,
+        title,
+        description,
+        profileImage,
+        backgroundImage,
+      }
+    );
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+module.exports = { register, singleUser, editUser };
