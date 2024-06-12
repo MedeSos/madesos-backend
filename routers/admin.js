@@ -1,8 +1,10 @@
 const express = require("express");
 const adminController = require("../controllers/adminController");
 const router = express.Router();
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 
-//routes
+//route
 //buat akun
 router.post("/register", adminController.register);
 //single akun

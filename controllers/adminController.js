@@ -20,8 +20,8 @@ const register = async (req, res) => {
       res.status(500).json({ message: "internal Server Eror" });
     }
   } catch (error) {
-    console.log(error);
     res.status(500).send("Terjadi kesalahan server");
+    return;
   }
 };
 //single akun
