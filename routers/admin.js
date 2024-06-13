@@ -6,10 +6,10 @@ const upload = multer({ dest: "uploads/" });
 
 //route
 //buat akun
-router.post("/register", adminController.register);
+router.post("/user", adminController.register);
 //single akun
 router.get("/user/:id", adminController.singleUser);
 //edit akun
-router.patch("/edituser/:id", adminController.editUser);
+router.patch("/:id/edit", adminController.editUser);
 
 module.exports = router;
