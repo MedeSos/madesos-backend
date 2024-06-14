@@ -1,11 +1,7 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const imagePostSchema = new mongoose.Schema(
   {
-    userId: {
-      type: ObjectId,
-      ref: "User",
-    },
     title: {
       type: String,
       required: true,
@@ -24,4 +20,4 @@ const imagePostSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("Blog", imagePostSchemaSchema);
+module.exports = mongoose.model("imagePost", imagePostSchema);

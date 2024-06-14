@@ -1,11 +1,7 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const videoPostSchema = new mongoose.Schema(
   {
-    userId: {
-      type: ObjectId,
-      ref: "User",
-    },
     title: {
       type: String,
       required: true,
@@ -24,4 +20,4 @@ const videoPostSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("Blog", videoPostSchema);
+module.exports = mongoose.model("videoPost", videoPostSchema);
