@@ -33,4 +33,5 @@ router.get("/video/:id", videoPostController.singleVideoPost);
 router.post("/video", videoPostController.createVideoPost);
 router.delete("/video/:id", videoPostController.deleteVideoPost);
 router.patch("/video/:id/edit", videoPostController.editVideoPost);
+
 module.exports = router;

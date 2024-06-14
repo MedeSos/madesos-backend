@@ -32,7 +32,7 @@ const singleBlogPost = async (req, res) => {
 const editBlogPost = async (req, res) => {
   const { title, body, media } = req.body;
   try {
-    const user = await userModel.findOneAndUpdate(
+    const user = await blogPostModel.findOneAndUpdate(
       { _id: req.params.id },
       {
         title,
@@ -40,7 +40,7 @@ const editBlogPost = async (req, res) => {
         media,
       }
     );
-    res.status(200).json(user);
+    res.status(200).json(editBlogPost);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
