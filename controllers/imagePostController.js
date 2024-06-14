@@ -14,7 +14,7 @@ const createImagePost = async (req, res) => {
   const { title, body, media } = req.body;
   try {
     const createImagePost = await imagePostModel.create({ title, body, media });
-    res.status(200).json(createImagePost);
+    res.status(200).json({ message: "Image Post Created", createImagePost });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -32,7 +32,7 @@ const singleImagePost = async (req, res) => {
 const editImagePost = async (req, res) => {
   const { title, body, media } = req.body;
   try {
-    const user = await imagePostModelModel.findOneAndUpdate(
+    const editImagePost = await imagePostModel.findOneAndUpdate(
       { _id: req.params.id },
       {
         title,
@@ -40,7 +40,7 @@ const editImagePost = async (req, res) => {
         media,
       }
     );
-    res.status(200).json(user);
+    res.status(200).json({ message: "Image Post Updated", editImagePost });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -52,7 +52,7 @@ const deleteImagePost = async (req, res) => {
     const deleteImagePost = await blogImageModel.findOneAndDelete({
       _id: req.params.id,
     });
-    res.status(200).json(deleteImagePost);
+    res.status(200).json({ message: "Image Post Deleted", deleteImagePost });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

@@ -14,7 +14,7 @@ const createBlogPost = async (req, res) => {
   const { title, body, media } = req.body;
   try {
     const createBlogPost = await blogPostModel.create({ title, body, media });
-    res.status(200).json(createBlogPost);
+    res.status(200).json({ message: "Blog Post Created", createBlogPost });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -40,7 +40,7 @@ const editBlogPost = async (req, res) => {
         media,
       }
     );
-    res.status(200).json(editBlogPost);
+    res.status(200).json({ message: "Blog Post Upated", editBlogPost });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -52,7 +52,7 @@ const deleteBlogPost = async (req, res) => {
     const deleteBlogPost = await blogPostModel.findOneAndDelete({
       _id: req.params.id,
     });
-    res.status(200).json(deleteBlogPost);
+    res.status(200).json({ message: "Blog Post Deleted", deleteBlogPost });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

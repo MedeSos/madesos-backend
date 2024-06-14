@@ -3,7 +3,7 @@ const videoPostModel = require("../models/videoPost");
 //get all ImagePost
 const getAllVideoPost = async (req, res) => {
   try {
-    const videoPost = await VideoPostModel.find().sort({ createdAt: -1 });
+    const videoPost = await videoPostModel.find().sort({ createdAt: -1 });
     res.status(200).json(videoPost);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -13,8 +13,8 @@ const getAllVideoPost = async (req, res) => {
 const createVideoPost = async (req, res) => {
   const { title, body, media } = req.body;
   try {
-    const createVideoPost = await VideoPostModel.create({ title, body, media });
-    res.status(200).json(createVideoPost);
+    const createVideoPost = await videoPostModel.create({ title, body, media });
+    res.status(200).json({ message: "Video Post Updated", createVideoPost });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -22,7 +22,7 @@ const createVideoPost = async (req, res) => {
 //single VideoPost
 const singleVideoPost = async (req, res) => {
   try {
-    const singleVideoPost = await VideoPostModel.findById(req.params.id);
+    const singleVideoPost = await videoPostModel.findById(req.params.id);
     res.status(200).json(singleVideoPost);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -32,7 +32,7 @@ const singleVideoPost = async (req, res) => {
 const editVideoPost = async (req, res) => {
   const { title, body, media } = req.body;
   try {
-    const user = await VideoPostModelModel.findOneAndUpdate(
+    const editVideoPost = await videoPostModel.findOneAndUpdate(
       { _id: req.params.id },
       {
         title,
@@ -40,7 +40,7 @@ const editVideoPost = async (req, res) => {
         media,
       }
     );
-    res.status(200).json(user);
+    res.status(200).json({ message: "Video Post Updated", editVideoPost });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -49,10 +49,10 @@ const editVideoPost = async (req, res) => {
 //delete VideoPost
 const deleteVideoPost = async (req, res) => {
   try {
-    const deleteVideoPost = await blogImageModel.findOneAndDelete({
+    const deleteVideoPost = await videoPostModel.findOneAndDelete({
       _id: req.params.id,
     });
-    res.status(200).json(deleteVideoPost);
+    res.status(200).json({ message: "Video Post Deleted", deleteVideoPost });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
