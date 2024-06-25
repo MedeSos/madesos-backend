@@ -11,7 +11,7 @@ const upload = multer({ dest: "uploads/" });
 //Route User
 router.post("/user", userController.register);
 router.get("/user/:id", userController.singleUser);
-router.patch("user/:id/edit", userController.editUser);
+router.patch("/user/:id/edit", userController.editUser);
 
 //Route BlogPost
 router.get("/blog", blogPostController.getAllBlogPost);

@@ -8,7 +8,7 @@ const port = process.env.PORT;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.use("/api", adminRoutes);
 //connect to db
 const database = process.env.DB_URI;
 mongoose
@@ -21,4 +21,4 @@ mongoose
   })
   .catch((error) => console.log(error));
 
-app.use("/api", adminRoutes);
+
