@@ -1,7 +1,7 @@
-const videoPostModel = require("../models/videoPost");
+import videoPostModel from './../models/videoPost.js';
 
 //get all ImagePost
-const getAllVideoPost = async (req, res) => {
+export const getAllVideoPost = async (req, res) => {
   try {
     const videoPost = await videoPostModel.find().sort({ createdAt: -1 });
     res.status(200).json(videoPost);
@@ -10,7 +10,7 @@ const getAllVideoPost = async (req, res) => {
   }
 };
 //create VideoPost
-const createVideoPost = async (req, res) => {
+export const createVideoPost = async (req, res) => {
   const { title, body, media } = req.body;
   try {
     const createVideoPost = await videoPostModel.create({ title, body, media });
@@ -20,7 +20,7 @@ const createVideoPost = async (req, res) => {
   }
 };
 //single VideoPost
-const singleVideoPost = async (req, res) => {
+export const singleVideoPost = async (req, res) => {
   try {
     const singleVideoPost = await videoPostModel.findById(req.params.id);
     res.status(200).json(singleVideoPost);
@@ -29,7 +29,7 @@ const singleVideoPost = async (req, res) => {
   }
 };
 //edit VideoPost
-const editVideoPost = async (req, res) => {
+export const editVideoPost = async (req, res) => {
   const { title, body, media } = req.body;
   try {
     const editVideoPost = await videoPostModel.findOneAndUpdate(
@@ -47,7 +47,7 @@ const editVideoPost = async (req, res) => {
 };
 
 //delete VideoPost
-const deleteVideoPost = async (req, res) => {
+export const deleteVideoPost = async (req, res) => {
   try {
     const deleteVideoPost = await videoPostModel.findOneAndDelete({
       _id: req.params.id,
@@ -58,10 +58,3 @@ const deleteVideoPost = async (req, res) => {
   }
 };
 
-module.exports = {
-  getAllVideoPost,
-  singleVideoPost,
-  editVideoPost,
-  createVideoPost,
-  deleteVideoPost,
-};

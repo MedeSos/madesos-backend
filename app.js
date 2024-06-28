@@ -1,8 +1,9 @@
-require("dotenv").config();
-const express = require("express");
-const mongoose = require("mongoose");
-const adminRoutes = require("./routers/admin");
-const cors = require("cors");
+import dotenv from 'dotenv';
+dotenv.config();
+import express from 'express';
+import mongoose from 'mongoose';
+import adminRoutes from './routers/admin.js';
+import cors from 'cors';
 
 const app = express();
 const port = process.env.PORT;

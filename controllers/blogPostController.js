@@ -1,7 +1,7 @@
-const blogPostModel = require("../models/blogPost");
+import blogPostModel from "../models/blogPost.js";
 
 //get all BlogPost
-const getAllBlogPost = async (req, res) => {
+export const getAllBlogPost = async (req, res) => {
   try {
     const blogPost = await blogPostModel.find().sort({ createdAt: -1 });
     res.status(200).json(blogPost);
@@ -10,7 +10,7 @@ const getAllBlogPost = async (req, res) => {
   }
 };
 //create BlogPost
-const createBlogPost = async (req, res) => {
+export const createBlogPost = async (req, res) => {
   const { title, body, media } = req.body;
   try {
     const createBlogPost = await blogPostModel.create({ title, body, media });
@@ -20,7 +20,7 @@ const createBlogPost = async (req, res) => {
   }
 };
 //single BlogPost
-const singleBlogPost = async (req, res) => {
+export const singleBlogPost = async (req, res) => {
   try {
     const singleBlogPost = await blogPostModel.findById(req.params.id);
     res.status(200).json(singleBlogPost);
@@ -29,7 +29,7 @@ const singleBlogPost = async (req, res) => {
   }
 };
 //edit BlogPost
-const editBlogPost = async (req, res) => {
+export const editBlogPost = async (req, res) => {
   const { title, body, media } = req.body;
   try {
     const user = await blogPostModel.findOneAndUpdate(
@@ -47,7 +47,7 @@ const editBlogPost = async (req, res) => {
 };
 
 //delete BlogPost
-const deleteBlogPost = async (req, res) => {
+export const deleteBlogPost = async (req, res) => {
   try {
     const deleteBlogPost = await blogPostModel.findOneAndDelete({
       _id: req.params.id,
@@ -56,12 +56,4 @@ const deleteBlogPost = async (req, res) => {
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
-};
-
-module.exports = {
-  getAllBlogPost,
-  singleBlogPost,
-  editBlogPost,
-  createBlogPost,
-  deleteBlogPost,
 };

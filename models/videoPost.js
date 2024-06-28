@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from 'mongoose';
 
 const videoPostSchema = new mongoose.Schema(
   {
@@ -20,4 +20,5 @@ const videoPostSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("videoPost", videoPostSchema);
+const videoPostModel = mongoose.model("videoPost", videoPostSchema);
+export default videoPostModel

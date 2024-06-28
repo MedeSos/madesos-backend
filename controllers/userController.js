@@ -1,8 +1,8 @@
-const userModel = require("../models/user");
-const bcrypt = require("bcrypt");
+import userModel from "../models/user.js";
+import bcrypt from 'bcrypt';
 
 //Register akun
-const register = async (req, res) => {
+export const register = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -36,7 +36,7 @@ const register = async (req, res) => {
   }
 };
 //single akun
-const singleUser = async (req, res) => {
+export const singleUser = async (req, res) => {
   try {
     const user = await userModel.findById(req.params.id);
     res.status(200).json(user);
@@ -45,7 +45,7 @@ const singleUser = async (req, res) => {
   }
 };
 //edit akun
-const editUser = async (req, res) => {
+export const editUser = async (req, res) => {
   const {
     name,
     email,
@@ -86,4 +86,3 @@ const editUser = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-module.exports = { register, singleUser, editUser };

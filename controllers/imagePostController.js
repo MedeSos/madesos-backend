@@ -1,7 +1,7 @@
-const imagePostModel = require("../models/imagePost");
+import imagePostModel from './../models/imagePost.js';
 
 //get all ImagePost
-const getAllImagePost = async (req, res) => {
+export const getAllImagePost = async (req, res) => {
   try {
     const imagePost = await imagePostModel.find().sort({ createdAt: -1 });
     res.status(200).json(imagePost);
@@ -10,7 +10,7 @@ const getAllImagePost = async (req, res) => {
   }
 };
 //create ImagePost
-const createImagePost = async (req, res) => {
+export const createImagePost = async (req, res) => {
   const { title, body, media } = req.body;
   try {
     const createImagePost = await imagePostModel.create({ title, body, media });
@@ -20,7 +20,7 @@ const createImagePost = async (req, res) => {
   }
 };
 //single ImagePost
-const singleImagePost = async (req, res) => {
+export const singleImagePost = async (req, res) => {
   try {
     const singleImagePost = await imagePostModel.findById(req.params.id);
     res.status(200).json(singleImagePost);
@@ -29,7 +29,7 @@ const singleImagePost = async (req, res) => {
   }
 };
 //edit ImagePost
-const editImagePost = async (req, res) => {
+export const editImagePost = async (req, res) => {
   const { title, body, media } = req.body;
   try {
     const editImagePost = await imagePostModel.findOneAndUpdate(
@@ -47,7 +47,7 @@ const editImagePost = async (req, res) => {
 };
 
 //delete ImagePost
-const deleteImagePost = async (req, res) => {
+export const deleteImagePost = async (req, res) => {
   try {
     const deleteImagePost = await blogImageModel.findOneAndDelete({
       _id: req.params.id,
@@ -58,10 +58,3 @@ const deleteImagePost = async (req, res) => {
   }
 };
 
-module.exports = {
-  getAllImagePost,
-  singleImagePost,
-  editImagePost,
-  createImagePost,
-  deleteImagePost,
-};
