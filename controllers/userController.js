@@ -1,14 +1,20 @@
 import userModel from "../models/user.js";
 import bcrypt from 'bcrypt';
 
-//Register akun
+//User Register
 export const register = async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    //  email to lowercase
+   email = email.toLowerCase();
+    // check empty password
+    if (!password || password.trim() === "") {
+      return res.status(400).json({ message: "Please provide password" });
+    }
+    // check if user exists
     let user = await userModel.findOne({ email });
     if (user) {
-      return res.status(409).json({ message: "user already in use" });
+      return res.status(409).json({ message: "User already in use" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -18,71 +24,62 @@ export const register = async (req, res) => {
       password: hashedPassword,
     })
 
-    res.status(201).json({ message: "user created" });
-    // try {
-    //   const user = await userModel.create({
-    //     email,
-    //     password: hashedPassword,
-    //   });
-    //   res.status(201).json({ message: "user created", user });
-    // } catch (error) {
-    //   if (error.code === 11000) {
-    //     res.status(409).json({ message: "user already in use" });
-    //   }
-    //   return res.status(500).json({ message: "internal Server Eror" });
-    // }
+    res.status(201).json({ message: "Registered successfully" });
+
   } catch (error) {
-    return res.status(500).send("Terjadi kesalahan server");
+    return res.status(500).send("Internal Server Error");
   }
 };
-//single akun
+
+//User Login
+
+//Single User
 export const singleUser = async (req, res) => {
   try {
+    // check if user exists
     const user = await userModel.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
     res.status(200).json(user);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).send("Internal Server Error");
   }
 };
-//edit akun
+
+//Edit User
 export const editUser = async (req, res) => {
   const {
     name,
-    email,
     password,
     title,
     description,
     profileImage,
     backgroundImage,
   } = req.body;
-  try {
-    // const user = await userModel.findOneAndUpdate(
-    //   { _id: req.params.id },
-    //   {
-    //     name,
-    //     email,
-    //     password,
-    //     title,
-    //     description,
-    //     profileImage,
-    //     backgroundImage,
-    //   }
-    // );
-    let user = await userModel.findOne({ _id: req.params.id });
-    await userModel.updateOne({
-      name:name,
-      email:user.email,
-      password:user.password,
-      title:user.title,
-      description:user.description,
-      profileImage:user.profileImage,
-      backgroundImage:user.backgroundImage,
-    })
 
+  try {
+    let user = await userModel.findOne({ _id: req.params.id });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update if user change new value
+    const updateUser = {
+      name: name || user.name,
+      password: password || user.password,
+      title: title || user.title,
+      description: description ||  user.description,
+      profileImage: profileImage || user.profileImage,
+      backgroundImage: backgroundImage || user.backgroundImage,
+    };
+    // Update User
+    await userModel.updateOne({ _id: req.params.id }, updateUser);
+    // Find Updated User
     user = await userModel.findOne({ _id: req.params.id });
 
-    res.status(200).json(user);
+    res.status(200).json({message: "User has been updated", user});
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).send("Internal Server Error");
   }
 };
