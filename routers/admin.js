@@ -1,18 +1,45 @@
-import express from 'express';
-import { register, singleUser, editUser } from './../controllers/userController.js';
-import { getAllBlogPost, singleBlogPost, createBlogPost, deleteBlogPost, editBlogPost } from './../controllers/blogPostController.js';
-import { getAllImagePost, singleImagePost, createImagePost, deleteImagePost, editImagePost } from './../controllers/imagePostController.js';
-import { getAllVideoPost, singleVideoPost, createVideoPost, deleteVideoPost, editVideoPost } from './../controllers/videoPostController.js';
+import express from "express";
 
-import multer from 'multer';
-const upload = multer({ dest: 'uploads/' });
+import { login } from "./../controllers/loginController.js";
+import {
+  register,
+  singleUser,
+  editUser,
+} from "./../controllers/userController.js";
+import {
+  getAllBlogPost,
+  singleBlogPost,
+  createBlogPost,
+  deleteBlogPost,
+  editBlogPost,
+} from "./../controllers/blogPostController.js";
+import {
+  getAllImagePost,
+  singleImagePost,
+  createImagePost,
+  deleteImagePost,
+  editImagePost,
+} from "./../controllers/imagePostController.js";
+import {
+  getAllVideoPost,
+  singleVideoPost,
+  createVideoPost,
+  deleteVideoPost,
+  editVideoPost,
+} from "./../controllers/videoPostController.js";
+
+import multer from "multer";
+const upload = multer({ dest: "uploads/" });
 const router = express.Router();
 
 // middleware
 router.use((req, res, next) => {
-  if(req.body.email) req.body.email = req.body.email.toLowerCase();
+  if (req.body.email) req.body.email = req.body.email.toLowerCase();
   next();
 });
+
+//Route Login
+router.post("/login", login);
 
 //Route User
 router.post("/user", register);

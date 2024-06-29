@@ -1,5 +1,5 @@
-import userModel from "../models/user.js";
-import bcrypt from 'bcrypt';
+import userModel from "../models/User.js";
+import bcrypt from "bcrypt";
 
 //User Register
 export const register = async (req, res) => {
@@ -20,10 +20,9 @@ export const register = async (req, res) => {
     await userModel.create({
       email,
       password: hashedPassword,
-    })
+    });
 
     res.status(201).json({ message: "Registered successfully" });
-
   } catch (error) {
     return res.status(500).send("Internal Server Error");
   }
@@ -47,14 +46,8 @@ export const singleUser = async (req, res) => {
 
 //Edit User
 export const editUser = async (req, res) => {
-  const {
-    name,
-    password,
-    title,
-    description,
-    profileImage,
-    backgroundImage,
-  } = req.body;
+  const { name, password, title, description, profileImage, backgroundImage } =
+    req.body;
 
   try {
     let user = await userModel.findOne({ _id: req.params.id });
@@ -67,7 +60,7 @@ export const editUser = async (req, res) => {
       name: name || user.name,
       password: password || user.password,
       title: title || user.title,
-      description: description ||  user.description,
+      description: description || user.description,
       profileImage: profileImage || user.profileImage,
       backgroundImage: backgroundImage || user.backgroundImage,
     };
@@ -76,7 +69,7 @@ export const editUser = async (req, res) => {
     // Find Updated User
     user = await userModel.findOne({ _id: req.params.id });
 
-    res.status(200).json({message: "User has been updated", user});
+    res.status(200).json({ message: "User has been updated", user });
   } catch (error) {
     res.status(500).send("Internal Server Error");
   }
