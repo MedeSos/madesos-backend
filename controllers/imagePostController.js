@@ -6,55 +6,75 @@ export const getAllImagePost = async (req, res) => {
     const imagePost = await imagePostModel.find().sort({ createdAt: -1 });
     res.status(200).json(imagePost);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).send("Internal Server Error");
   }
 };
+
 //create ImagePost
 export const createImagePost = async (req, res) => {
   const { title, body, media } = req.body;
+  // validation
+  if (!title) return res.status(400).json({ error: "title is required" });
+  if (!body) return res.status(400).json({ error: "body is required" });
+
   try {
     const createImagePost = await imagePostModel.create({ title, body, media });
-    res.status(200).json({ message: "Image Post Created", createImagePost });
+    res.status(200).json({ message: "Image Post has been created", createImagePost });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).send("Internal Server Error");
   }
 };
+
 //single ImagePost
 export const singleImagePost = async (req, res) => {
   try {
     const singleImagePost = await imagePostModel.findById(req.params.id);
+    if (!singleImagePost) {
+      return res.status(404).json({ message: "Image Post not found" });
+    }
     res.status(200).json(singleImagePost);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).send("Internal Server Error");
   }
 };
+
 //edit ImagePost
 export const editImagePost = async (req, res) => {
   const { title, body, media } = req.body;
   try {
-    const editImagePost = await imagePostModel.findOneAndUpdate(
+    let getImage = await imagePostModel.findById(req.params.id);
+    if (!getImage) {
+      return res.status(404).json({ message: "Image Post not found" });
+    }
+    await imagePostModel.updateOne(
       { _id: req.params.id },
       {
-        title,
-        body,
-        media,
+        title: title || getImage.title,
+        body: body || getImage.body,
+        media: media || getImage.media
       }
     );
-    res.status(200).json({ message: "Image Post Updated", editImagePost });
+
+    getImage = await imagePostModel.findById(req.params.id);
+    res.status(200).json({ message: "Image Post has been updated", Image: getImage });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).send("Internal Server Error");
   }
 };
 
 //delete ImagePost
 export const deleteImagePost = async (req, res) => {
   try {
-    const deleteImagePost = await blogImageModel.findOneAndDelete({
-      _id: req.params.id,
-    });
-    res.status(200).json({ message: "Image Post Deleted", deleteImagePost });
+    const getImage = await imagePostModel.findById(req.params.id);
+    if (!getImage) {
+      return res.status(404).json({ message: "Image Post not found" });
+    }
+    await imagePostModel.deleteOne(
+      { _id: req.params.id, }
+    );
+    res.status(200).json({ message: "Image Post has been deleted", image: getImage });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).send("Internal Server Error");
   }
 };
 
