@@ -8,6 +8,12 @@ import multer from 'multer';
 const upload = multer({ dest: 'uploads/' });
 const router = express.Router();
 
+// middleware
+router.use((req, res, next) => {
+  if(req.body.email) req.body.email = req.body.email.toLowerCase();
+  next();
+});
+
 //Route User
 router.post("/user", register);
 router.get("/user/:id", singleUser);

@@ -5,8 +5,6 @@ import bcrypt from 'bcrypt';
 export const register = async (req, res) => {
   try {
     const { email, password } = req.body;
-    //  email to lowercase
-   email = email.toLowerCase();
     // check empty password
     if (!password || password.trim() === "") {
       return res.status(400).json({ message: "Please provide password" });
