@@ -3,6 +3,7 @@ dotenv.config();
 import express from 'express';
 import mongoose from 'mongoose';
 import adminRoutes from './routers/admin.js';
+import publicRoutes from './routers/public.js';
 import cors from 'cors';
 
 const app = express();
@@ -11,6 +12,7 @@ const port = process.env.PORT;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/auth", publicRoutes);
 app.use("/api", adminRoutes);
 
 //connect to db

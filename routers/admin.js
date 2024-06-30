@@ -1,8 +1,6 @@
 import express from "express";
 
-import { login } from "./../controllers/loginController.js";
 import {
-  register,
   singleUser,
   editUser,
 } from "./../controllers/userController.js";
@@ -27,24 +25,19 @@ import {
   deleteVideoPost,
   editVideoPost,
 } from "./../controllers/videoPostController.js";
-
+import auth from './../middlewares/authMiddleware.js';
+import emailToLowerCase from './../middlewares/helperMiddleware.js';
 import multer from "multer";
+
 const upload = multer({ dest: "uploads/" });
 const router = express.Router();
 
 // middleware
-router.use((req, res, next) => {
-  if (req.body.email) req.body.email = req.body.email.toLowerCase();
-  next();
-});
+router.use(auth);
 
-//Route Login
-router.post("/login", login);
-
-//Route User
-router.post("/user", register);
+// Route User
 router.get("/user/:id", singleUser);
-router.patch("/user/:id/edit", editUser);
+router.patch("/user/:id/edit",emailToLowerCase, editUser);
 
 //Route BlogPost
 router.get("/blog", getAllBlogPost);

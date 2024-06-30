@@ -1,10 +1,15 @@
 import userModel from "../models/User.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 //User Register
 export const register = async (req, res) => {
   try {
     const { email, password } = req.body;
+    // check empty email
+    if (!email || email.trim() === "") {
+      return res.status(400).json({ message: "Please provide email" });
+    }
     // check empty password
     if (!password || password.trim() === "") {
       return res.status(400).json({ message: "Please provide password" });
@@ -29,6 +34,29 @@ export const register = async (req, res) => {
 };
 
 //User Login
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+  // check empty email
+  if (!email || email.trim() === "") {
+    return res.status(400).json({ message: "Please provide email" });
+  }
+  // check empty password
+  if (!password || password.trim() === "") {
+    return res.status(400).json({ message: "Please provide password" });
+  }
+
+  // check if user exists
+  const user = await userModel.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: "invalid email or password" });
+  }
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    return res.status(400).json({ message: "invalid email or password" });
+  }
+  const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY, { expiresIn: "1d" });
+  res.status(200).json({ token });
+};
 
 //Single User
 export const singleUser = async (req, res) => {
