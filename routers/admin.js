@@ -1,9 +1,6 @@
 import express from "express";
 
-import {
-  singleUser,
-  editUser,
-} from "./../controllers/userController.js";
+import { singleUser, editUser } from "./../controllers/userController.js";
 import {
   getAllBlogPost,
   singleBlogPost,
@@ -25,8 +22,8 @@ import {
   deleteVideoPost,
   editVideoPost,
 } from "./../controllers/videoPostController.js";
-import auth from './../middlewares/authMiddleware.js';
-import emailToLowerCase from './../middlewares/helperMiddleware.js';
+import auth from "./../middlewares/authMiddleware.js";
+import emailToLowerCase from "./../middlewares/helperMiddleware.js";
 import multer from "multer";
 
 const upload = multer({ dest: "uploads/" });
@@ -37,7 +34,7 @@ router.use(auth);
 
 // Route User
 router.get("/user/:id", singleUser);
-router.patch("/user/:id/edit",emailToLowerCase, editUser);
+router.patch("/user/:id/edit", emailToLowerCase, editUser);
 
 //Route BlogPost
 router.get("/blog", getAllBlogPost);

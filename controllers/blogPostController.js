@@ -51,13 +51,15 @@ export const editBlogPost = async (req, res) => {
       {
         title: title || getBlog.title,
         body: body || getBlog.body,
-        media: media || getBlog.media
+        media: media || getBlog.media,
       }
     );
 
     getBlog = await blogPostModel.findById(req.params.id);
 
-    res.status(200).json({ message: "Blog Post has been updated", blog: getBlog });
+    res
+      .status(200)
+      .json({ message: "Blog Post has been updated", blog: getBlog });
   } catch (error) {
     res.status(500).send("Internal Server Error");
   }
@@ -70,10 +72,10 @@ export const deleteBlogPost = async (req, res) => {
     if (!getBlog) {
       return res.status(404).json({ message: "Blog Post not found" });
     }
-    await blogPostModel.deleteOne(
-      { _id: req.params.id, }
-    );
-    res.status(200).json({ message: "Blog Post has been deleted", blog: getBlog });
+    await blogPostModel.deleteOne({ _id: req.params.id });
+    res
+      .status(200)
+      .json({ message: "Blog Post has been deleted", blog: getBlog });
   } catch (error) {
     res.status(500).send("Internal Server Error");
   }

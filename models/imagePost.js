@@ -1,4 +1,6 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+const { Schema } = mongoose;
+const { ObjectId } = Schema.Types;
 
 const imagePostSchema = new mongoose.Schema(
   {
@@ -14,6 +16,19 @@ const imagePostSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    author: [
+      {
+        _id: {
+          type: ObjectId,
+          ref: "User",
+          required: true,
+        },
+        name: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

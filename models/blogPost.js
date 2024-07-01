@@ -1,6 +1,9 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const blogPostSchema = new mongoose.Schema(
+const { Schema, model } = mongoose;
+const { ObjectId } = Schema.Types;
+
+const blogPostSchema = new Schema(
   {
     title: {
       type: String,
@@ -14,11 +17,24 @@ const blogPostSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    author: [
+      {
+        _id: {
+          type: ObjectId,
+          ref: "User",
+          required: true,
+        },
+        name: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
 
-const blogPostModel = mongoose.model("blogPost", blogPostSchema);
+const blogPostModel = model("blogPost", blogPostSchema);
 export default blogPostModel;
