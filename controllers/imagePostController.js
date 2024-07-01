@@ -18,7 +18,7 @@ export const createImagePost = async (req, res) => {
   if (!body) return res.status(400).json({ error: "body is required" });
 
   try {
-    const createImagePost = await imagePostModel.create({ title, body, media });
+    const createImagePost = await imagePostModel.create({ title, body, media,author: req.user.id });
     res.status(200).json({ message: "Image Post has been created", createImagePost });
   } catch (error) {
     res.status(500).send("Internal Server Error");

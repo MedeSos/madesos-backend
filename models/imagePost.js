@@ -16,19 +16,11 @@ const imagePostSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    author: [
-      {
-        _id: {
-          type: ObjectId,
-          ref: "User",
-          required: true,
-        },
-        name: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
+    author: {
+      type: ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   {
     timestamps: true,

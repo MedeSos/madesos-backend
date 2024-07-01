@@ -18,7 +18,7 @@ export const createBlogPost = async (req, res) => {
   if (!body) return res.status(400).json({ error: "body is required" });
 
   try {
-    const createBlogPost = await blogPostModel.create({ title, body, media });
+    const createBlogPost = await blogPostModel.create({ title, body, media, author: req.user.id });
     res.status(200).json({ message: "Blog Post Created", createBlogPost });
   } catch (error) {
     res.status(500).send("Internal Server Error");
