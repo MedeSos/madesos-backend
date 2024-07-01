@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const { Schema } = mongoose;
+const { Schema, model } = mongoose;
 const { ObjectId } = Schema.Types;
 
 const imagePostSchema = new mongoose.Schema(
@@ -35,5 +35,5 @@ const imagePostSchema = new mongoose.Schema(
   }
 );
 
-export const imagePostModel = mongoose.model("imagePost", imagePostSchema);
+export const imagePostModel = model("imagePost", imagePostSchema);
 export default imagePostModel;
