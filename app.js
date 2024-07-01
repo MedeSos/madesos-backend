@@ -5,11 +5,12 @@ import mongoose from 'mongoose';
 import adminRoutes from './routers/admin.js';
 import publicRoutes from './routers/public.js';
 import cors from 'cors';
+import { corsOptions } from './utils/corsOptions.js';
 
 const app = express();
 const port = process.env.PORT;
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/auth", publicRoutes);
