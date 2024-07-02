@@ -42,9 +42,12 @@ export const singleBlogPost = async (req, res) => {
 export const editBlogPost = async (req, res) => {
   const { title, body, media } = req.body;
   try {
-    let getBlog = await blogPostModel.findById(req.params.id);
+    let getBlog = await blogPostModel.findById(req.params.id).populate("author");
     if (!getBlog) {
       return res.status(404).json({ message: "Blog Post not found" });
+    }
+    if (req.user.id != getBlog.author._id) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
     await blogPostModel.updateOne(
       { _id: req.params.id },
@@ -71,6 +74,9 @@ export const deleteBlogPost = async (req, res) => {
     const getBlog = await blogPostModel.findById(req.params.id);
     if (!getBlog) {
       return res.status(404).json({ message: "Blog Post not found" });
+    }
+    if (req.user.id != getBlog.author._id) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
     await blogPostModel.deleteOne({ _id: req.params.id });
     res

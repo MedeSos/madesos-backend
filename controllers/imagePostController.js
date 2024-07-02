@@ -46,6 +46,9 @@ export const editImagePost = async (req, res) => {
     if (!getImage) {
       return res.status(404).json({ message: "Image Post not found" });
     }
+    if (req.user.id != getImage.author._id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     await imagePostModel.updateOne(
       { _id: req.params.id },
       {
@@ -68,6 +71,9 @@ export const deleteImagePost = async (req, res) => {
     const getImage = await imagePostModel.findById(req.params.id);
     if (!getImage) {
       return res.status(404).json({ message: "Image Post not found" });
+    }
+    if (req.user.id != getImage.author._id) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
     await imagePostModel.deleteOne(
       { _id: req.params.id, }

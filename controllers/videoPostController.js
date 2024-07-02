@@ -32,6 +32,9 @@ export const singleVideoPost = async (req, res) => {
     if (!singleVideoPost) {
       return res.status(404).json({ message: "Video Post not found" });
     }
+    if (req.user.id != getVideo.author._id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     res.status(200).json(singleVideoPost);
   } catch (error) {
     res.status(500).send("Internal Server Error");
@@ -45,6 +48,9 @@ export const editVideoPost = async (req, res) => {
     let getVideo = await videoPostModel.findById(req.params.id);
     if (!getVideo) {
       return res.status(404).json({ message: "Video Post not found" });
+    }
+    if (req.user.id != getVideo.author._id) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
     await videoPostModel.updateOne(
       { _id: req.params.id },

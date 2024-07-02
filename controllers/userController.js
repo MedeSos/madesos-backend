@@ -1,9 +1,15 @@
 import userModel from "../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { registerSchema, loginSchema, updateSchema } from "../validations/userValidation.js";
 
 //User Register
 export const register = async (req, res) => {
+  const { error } = registerSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message.replace(/"/g, '') });
+  }
+
   try {
     const { email, password } = req.body;
     // check empty email
@@ -36,6 +42,11 @@ export const register = async (req, res) => {
 //User Login
 export const login = async (req, res) => {
   const { email, password } = req.body;
+  const { error } = loginSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message.replace(/"/g, '') });
+  }
+
   // check empty email
   if (!email || email.trim() === "") {
     return res.status(400).json({ message: "Please provide email" });
@@ -74,8 +85,13 @@ export const singleUser = async (req, res) => {
 
 //Edit User
 export const editUser = async (req, res) => {
-  const { name, password, title, description, profileImage, backgroundImage } =
+  const { name, title, description, profileImage, backgroundImage } =
     req.body;
+
+  // check if user is not authorized
+  if (req.user.id !== req.params.id) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 
   try {
     let user = await userModel.findOne({ _id: req.params.id });
@@ -86,12 +102,27 @@ export const editUser = async (req, res) => {
     // Update if user change new value
     const updateUser = {
       name: name || user.name,
-      password: password || user.password,
       title: title || user.title,
       description: description || user.description,
       profileImage: profileImage || user.profileImage,
       backgroundImage: backgroundImage || user.backgroundImage,
     };
+
+    // Update if user change new value
+    if (req.body.password.length > 0) {
+      updateUser.password = req.body.password;
+    }
+
+    const { error } = updateSchema.validate(updateUser);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message.replace(/"/g, '') });
+    }
+
+    console.log(updateUser.password);
+    // Hash Password
+    if (updateUser.password) {
+      updateUser.password = await bcrypt.hash(updateUser.password, 10);
+    }
     // Update User
     await userModel.updateOne({ _id: req.params.id }, updateUser);
     // Find Updated User
