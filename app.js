@@ -2,10 +2,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 import mongoose from 'mongoose';
+import path from 'path';
 import adminRoutes from './routers/admin.js';
 import publicRoutes from './routers/public.js';
 import cors from 'cors';
 import { corsOptions } from './utils/corsOptions.js';
+const __dirname = path.resolve();
 
 const app = express();
 const port = process.env.PORT;
@@ -13,6 +15,7 @@ const port = process.env.PORT;
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/assets",express.static(path.join(__dirname, "public/uploads")));
 app.use("/auth", publicRoutes);
 app.use("/api", adminRoutes);
 

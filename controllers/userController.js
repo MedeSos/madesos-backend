@@ -2,6 +2,8 @@ import userModel from "../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { registerSchema, loginSchema, updateSchema } from "../validations/userValidation.js";
+import { unlink, access } from 'fs';
+import mongoose from "mongoose";
 
 //User Register
 export const register = async (req, res) => {
@@ -85,9 +87,16 @@ export const singleUser = async (req, res) => {
 
 //Edit User
 export const editUser = async (req, res) => {
-  const { name, title, description, profileImage, backgroundImage } =
+  const { name, title, description } =
     req.body;
+    let profileImage = null;
+    let backgroundImage = null;
 
+  // check valid id
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "Invalid ID" });
+  }
+    
   // check if user is not authorized
   if (req.user.id !== req.params.id) {
     return res.status(401).json({ message: "Unauthorized" });
@@ -97,6 +106,40 @@ export const editUser = async (req, res) => {
     let user = await userModel.findOne({ _id: req.params.id });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
+    }
+    
+    if (req.files) {
+      // if user change profile image
+      if(req.files["profile-image"]){
+        const file = req.files["profile-image"][0];
+        const oldImage = user.profileImage;
+        if(oldImage) {
+          const imageName = user.profileImage.split("/").pop();
+          access(`${file.destination}/${imageName}`, (err) => {
+            if (err) throw new Error("File not found!");
+            unlink(`${file.destination}/${imageName}`, (err) => {
+              if (err) throw new Error("Failed to delete file!");
+            });
+          })
+        }
+        profileImage = req.protocol + "://" + req.get("host") + "/assets/images/" + file.filename;
+      }
+
+      // if user change background image
+      if(req.files["background-image"]){
+        const file = req.files["background-image"][0];
+        const oldImage = user.backgroundImage;
+        if(oldImage) {
+          const imageName = user.backgroundImage.split("/").pop();
+          access(`${file.destination}/${imageName}`, (err) => {
+            if (err) throw new Error("File not found!");
+            unlink(`${file.destination}/${imageName}`, (err) => {
+              if (err) throw new Error("Failed to delete file!");
+            });
+          })
+        }
+        backgroundImage = req.protocol + "://" + req.get("host") + "/assets/images/" + file.filename;
+      }
     }
 
     // Update if user change new value
@@ -109,7 +152,7 @@ export const editUser = async (req, res) => {
     };
 
     // Update if user change new value
-    if (req.body.password.length > 0) {
+    if (req.body.password && req.body.password.length > 0) {
       updateUser.password = req.body.password;
     }
 
@@ -117,8 +160,7 @@ export const editUser = async (req, res) => {
     if (error) {
       return res.status(400).json({ message: error.details[0].message.replace(/"/g, '') });
     }
-
-    console.log(updateUser.password);
+    
     // Hash Password
     if (updateUser.password) {
       updateUser.password = await bcrypt.hash(updateUser.password, 10);
@@ -127,9 +169,14 @@ export const editUser = async (req, res) => {
     await userModel.updateOne({ _id: req.params.id }, updateUser);
     // Find Updated User
     user = await userModel.findOne({ _id: req.params.id });
-
+    
     res.status(200).json({ message: "User has been updated", user });
   } catch (error) {
+    if (req.file) {
+      unlink(`${req.file.path}`, (err) => {
+        if (err) throw new Error("Failed to delete file!");
+      })
+    }
     res.status(500).send("Internal Server Error");
   }
 };

@@ -1,4 +1,6 @@
+import mongoose from "mongoose";
 import blogPostModel from "../models/blogPost.js";
+import {unlink,access} from "fs";
 
 //get all BlogPost
 export const getAllBlogPost = async (req, res) => {
@@ -12,7 +14,11 @@ export const getAllBlogPost = async (req, res) => {
 
 //create BlogPost
 export const createBlogPost = async (req, res) => {
-  const { title, body, media } = req.body;
+  const { title, body } = req.body;
+  if(!req.file){
+    return res.status(400).json({ error: "media is required" });
+  }
+  const media = req.protocol+"://"+req.get("host")+"/assets/images/"+req.file.filename
   // validation
   if (!title) return res.status(400).json({ error: "title is required" });
   if (!body) return res.status(400).json({ error: "body is required" });
@@ -40,7 +46,13 @@ export const singleBlogPost = async (req, res) => {
 
 //edit BlogPost
 export const editBlogPost = async (req, res) => {
-  const { title, body, media } = req.body;
+  const { title, body } = req.body;
+  let media = null;
+
+  // check valid id
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "Invalid ID" });
+  }
   try {
     let getBlog = await blogPostModel.findById(req.params.id).populate("author");
     if (!getBlog) {
@@ -48,6 +60,16 @@ export const editBlogPost = async (req, res) => {
     }
     if (req.user.id != getBlog.author._id) {
       return res.status(401).json({ message: "Unauthorized" });
+    }
+    if(req.file){
+      const imageName = getBlog.media.split("/").pop();
+      access(`${req.file.destination}/${imageName}`, (err) => {
+        if (err) throw new Error("File not found!");
+        unlink(`${req.file.destination}/${imageName}`, (err) => {
+          if (err) throw new Error("Failed to delete file!");
+        });
+      })
+      media = req.protocol+"://"+req.get("host")+"/assets/images/"+req.file.filename;
     }
     await blogPostModel.updateOne(
       { _id: req.params.id },
@@ -64,6 +86,11 @@ export const editBlogPost = async (req, res) => {
       .status(200)
       .json({ message: "Blog Post has been updated", blog: getBlog });
   } catch (error) {
+    if (req.file) {
+      unlink(`${req.file.path}`, (err) => {
+        if (err) throw new Error("Failed to delete file!");
+      })
+    }
     res.status(500).send("Internal Server Error");
   }
 };

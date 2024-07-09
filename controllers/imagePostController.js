@@ -1,4 +1,6 @@
 import imagePostModel from './../models/imagePost.js';
+import { unlink, access } from 'fs';
+import mongoose from 'mongoose';
 
 //get all ImagePost
 export const getAllImagePost = async (req, res) => {
@@ -12,7 +14,11 @@ export const getAllImagePost = async (req, res) => {
 
 //create ImagePost
 export const createImagePost = async (req, res) => {
-  const { title, body, media } = req.body;
+  const { title, body } = req.body;
+  if (!req.file) {
+    return res.status(400).json({ error: "media is required" });
+  }
+  const media = req.protocol + "://" + req.get("host") + "/assets/images/" + req.file.filename
   // validation
   if (!title) return res.status(400).json({ error: "title is required" });
   if (!body) return res.status(400).json({ error: "body is required" });
@@ -40,7 +46,14 @@ export const singleImagePost = async (req, res) => {
 
 //edit ImagePost
 export const editImagePost = async (req, res) => {
-  const { title, body, media } = req.body;
+  const { title, body } = req.body;
+  let media = null;
+
+  // check valid id
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "Invalid ID" });
+  }
+
   try {
     let getImage = await imagePostModel.findById(req.params.id);
     if (!getImage) {
@@ -48,6 +61,17 @@ export const editImagePost = async (req, res) => {
     }
     if (req.user.id != getImage.author._id) {
       return res.status(401).json({ message: "Unauthorized" });
+    }
+    if (req.file) {
+      const imageName = getImage.media.split("/").pop();
+      console.log(`${req.file.destination}/${imageName}`)
+      access(`${req.file.destination}/${imageName}`, (err) => {
+        if (err) throw new Error("File not found!");
+        unlink(`${req.file.destination}/${imageName}`, (err) => {
+          if (err) throw new Error("Failed to delete file!");
+        });
+      })
+      media = req.protocol + "://" + req.get("host") + "/assets/images/" + req.file.filename;
     }
     await imagePostModel.updateOne(
       { _id: req.params.id },
@@ -61,6 +85,11 @@ export const editImagePost = async (req, res) => {
     getImage = await imagePostModel.findById(req.params.id);
     res.status(200).json({ message: "Image Post has been updated", Image: getImage });
   } catch (error) {
+    if (req.file) {
+      unlink(`${req.file.path}`, (err) => {
+        if (err) throw new Error("Failed to delete file!");
+      })
+    }
     res.status(500).send("Internal Server Error");
   }
 };

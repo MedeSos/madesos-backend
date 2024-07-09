@@ -16,14 +16,6 @@ export const updateSchema = Joi.object({
   name: Joi.string().optional(),
   title: Joi.string().optional(),
   description: Joi.string().optional(),
-  profileImage:Joi.object({
-    filename:Joi.string().required(),
-    path:Joi.string().required(),
-    url:Joi.string().uri().required(),
-  }).optional(),
-  backgroundImage:Joi.object({
-    filename:Joi.string().required(),
-    path:Joi.string().required(),
-    url:Joi.string().uri().required(),
-  }).optional(),
+  profileImage: Joi.string().optional(),
+  backgroundImage: Joi.string().optional(),
 })
