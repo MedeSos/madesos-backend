@@ -89,14 +89,19 @@ export const singleUser = async (req, res) => {
 export const editUser = async (req, res) => {
   const { name, title, description } =
     req.body;
-    let profileImage = null;
-    let backgroundImage = null;
 
   // check valid id
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (req.files) {
+      Object.keys(req.files).forEach(key => {
+        unlink(req.files[key][0].path, (err) => {
+          if (err) throw new Error("Failed to delete file!");
+        })
+      });
+    }
     return res.status(400).json({ message: "Invalid ID" });
   }
-    
+
   // check if user is not authorized
   if (req.user.id !== req.params.id) {
     return res.status(401).json({ message: "Unauthorized" });
@@ -107,13 +112,13 @@ export const editUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    
+
     if (req.files) {
       // if user change profile image
-      if(req.files["profile-image"]){
+      if (req.files["profile-image"]) {
         const file = req.files["profile-image"][0];
         const oldImage = user.profileImage;
-        if(oldImage) {
+        if (oldImage) {
           const imageName = user.profileImage.split("/").pop();
           access(`${file.destination}/${imageName}`, (err) => {
             if (err) throw new Error("File not found!");
@@ -126,10 +131,10 @@ export const editUser = async (req, res) => {
       }
 
       // if user change background image
-      if(req.files["background-image"]){
+      if (req.files["background-image"]) {
         const file = req.files["background-image"][0];
         const oldImage = user.backgroundImage;
-        if(oldImage) {
+        if (oldImage) {
           const imageName = user.backgroundImage.split("/").pop();
           access(`${file.destination}/${imageName}`, (err) => {
             if (err) throw new Error("File not found!");
@@ -160,7 +165,7 @@ export const editUser = async (req, res) => {
     if (error) {
       return res.status(400).json({ message: error.details[0].message.replace(/"/g, '') });
     }
-    
+
     // Hash Password
     if (updateUser.password) {
       updateUser.password = await bcrypt.hash(updateUser.password, 10);
@@ -169,13 +174,15 @@ export const editUser = async (req, res) => {
     await userModel.updateOne({ _id: req.params.id }, updateUser);
     // Find Updated User
     user = await userModel.findOne({ _id: req.params.id });
-    
+
     res.status(200).json({ message: "User has been updated", user });
   } catch (error) {
-    if (req.file) {
-      unlink(`${req.file.path}`, (err) => {
-        if (err) throw new Error("Failed to delete file!");
-      })
+    if (req.files) {
+      Object.keys(req.files).forEach(key => {
+        unlink(req.files[key][0].path, (err) => {
+          if (err) throw new Error("Failed to delete file!");
+        })
+      });
     }
     res.status(500).send("Internal Server Error");
   }

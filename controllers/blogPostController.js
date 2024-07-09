@@ -51,6 +51,11 @@ export const editBlogPost = async (req, res) => {
 
   // check valid id
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    if (req.file) {
+      unlink(`${req.file.path}`, (err) => {
+        if (err) throw new Error("Failed to delete file!");
+      })
+    }
     return res.status(400).json({ message: "Invalid ID" });
   }
   try {
