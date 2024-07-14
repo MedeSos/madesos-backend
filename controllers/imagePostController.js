@@ -117,7 +117,6 @@ export const editImagePost = async (req, res) => {
     }
     if (req.file) {
       const imageName = getImage.media.split("/").pop();
-      console.log(`${req.file.destination}/${imageName}`)
       access(`${req.file.destination}/${imageName}`, (err) => {
         if (err) throw new Error("File not found!");
         unlink(`${req.file.destination}/${imageName}`, (err) => {

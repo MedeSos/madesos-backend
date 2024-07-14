@@ -10,23 +10,24 @@ export const requiredMedia = (req, res, next) => {
   next();
 }
 
-export const typeAllowed = {
+const typeAllowedImage = {
   "image/png": "png",
   "image/jpeg": "jpeg",
   "image/jpg": "jpg",
   "image/gif": "gif",
-  "video/mp4": "video",
+}
+
+const typeAllowedVideo = {
+  "video/mp4": "mp4",
 }
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // if(file.fieldname==="blog-banner") return cb(null, "public/uploads/blogs");
-    // if(file.fieldname==="image") return cb(null, "public/uploads/images");
-    // if(file.fieldname==="video") return cb(null, "public/uploads/videos");
-
-    if(typeAllowed[file.mimetype]!=="video") return cb(null, "public/uploads/images");
-    // else
-    cb(null, "public/uploads/videos");
+    if(typeAllowedVideo[file.mimetype]){ 
+      return cb(null, "public/uploads/videos");
+    }else if(typeAllowedImage[file.mimetype]){
+      return cb(null, "public/uploads/images");
+    }
   },
   filename: (req, file, cb) => {
     const random = Math.round(Math.random() * 1000000000);
@@ -34,14 +35,14 @@ const storage = multer.diskStorage({
   },
 });
 
-const fileFilter = (req, file, cb) => {
-  const isValid = typeAllowed[file.mimetype];
+const fileFilterImage = (req, file, cb) => {
+  const isValid = typeAllowedImage[file.mimetype];
   let error = null;
   if (!isValid) {
     error = {
       error: "INVALID_FILETYPE",
       statusCode: 400,
-      message: `Only file image and video type ${Object.values(typeAllowed)} are allowed!`,
+      message: `Only file image type ${Object.values(typeAllowedImage)} are allowed!`,
     }
   }
 
@@ -50,5 +51,22 @@ const fileFilter = (req, file, cb) => {
   cb(null, true);
 }
 
-export const upload = multer({ storage, fileFilter});
+export const uploadImage = multer({ storage, fileFilter: fileFilterImage});
 
+const fileFilterVideo = (req, file, cb) => {
+  const isValid = typeAllowedVideo[file.mimetype];
+  let error = null;
+  if (!isValid) {
+    error = {
+      error: "INVALID_FILETYPE",
+      statusCode: 400,
+      message: `Only file video type ${Object.values(typeAllowedVideo)} are allowed!`,
+    }
+  }
+  
+  if (error) return cb(error, false);
+  
+  cb(null, true);
+}
+
+export const uploadVideo = multer({ storage, fileFilter: fileFilterVideo});
