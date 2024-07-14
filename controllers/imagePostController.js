@@ -16,7 +16,11 @@ export const getAllImagePost = async (req, res) => {
 export const createImagePost = async (req, res) => {
   const { title, body } = req.body;
   if (!req.file) {
-    return res.status(400).json({ error: "media is required" });
+    return res.status(400).json({
+      error:"VALIDATION_ERROR",
+      statusCode: 400, 
+      message: "media is required"
+     });
   }
   const media = req.protocol + "://" + req.get("host") + "/assets/images/" + req.file.filename
   // validation
@@ -26,15 +30,32 @@ export const createImagePost = async (req, res) => {
         if (err) throw new Error("Failed to delete file!");
       })
     }
-    if (!title) return res.status(400).json({ error: "title is required" });
-    if (!body) return res.status(400).json({ error: "body is required" });
+    if (!title) return res.status(400).json({ 
+      error: "VALIDATION_ERROR",
+      statusCode: 400,
+      message: "title is required"
+     });
+    if (!body) return res.status(400).json({ 
+      error: "VALIDATION_ERROR",
+      statusCode: 400,
+      message: "body is required"
+     });
   }
 
   try {
     const createImagePost = await imagePostModel.create({ title, body, media,author: req.user.id });
-    res.status(200).json({ message: "Image Post has been created", createImagePost });
+    res.status(200).json({
+       error : null,
+       statusCode: 200,
+       message: "Image Post has been created", 
+       data:createImagePost 
+      });
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(500).send({
+      error:"INTERNAL_SERVER_ERROR",
+      statusCode: 500,
+      message:"Internal Server Error"
+    });
   }
 };
 
@@ -43,11 +64,19 @@ export const singleImagePost = async (req, res) => {
   try {
     const singleImagePost = await imagePostModel.findById(req.params.id);
     if (!singleImagePost) {
-      return res.status(404).json({ message: "Image Post not found" });
+      return res.status(404).json({
+         error:"VALIDATION_ERROR",
+         statusCode: 404,
+         message: "Image Post not found" 
+        });
     }
     res.status(200).json(singleImagePost);
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(500).send({
+      error:"INTERNAL_SERVER_ERROR",
+      statusCode: 500,
+      message:"Internal Server Error"
+    });
   }
 };
 
@@ -63,16 +92,28 @@ export const editImagePost = async (req, res) => {
         if (err) throw new Error("Failed to delete file!");
       })
     }
-    return res.status(400).json({ message: "Invalid ID" });
+    return res.status(400).json({ 
+      error:"VALIDATION_ERROR",
+      statusCode: 400,
+      message: "Invalid ID"
+     });
   }
 
   try {
     let getImage = await imagePostModel.findById(req.params.id);
     if (!getImage) {
-      return res.status(404).json({ message: "Image Post not found" });
+      return res.status(404).json({ 
+        error:"VALIDATION_ERROR",
+        statusCode: 404,
+        message: "Image Post not found" 
+      });
     }
     if (req.user.id != getImage.author._id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ 
+        error:"VALIDATION_ERROR",
+        statusCode: 401,
+        message: "Unauthorized" 
+      });
     }
     if (req.file) {
       const imageName = getImage.media.split("/").pop();
@@ -95,14 +136,23 @@ export const editImagePost = async (req, res) => {
     );
 
     getImage = await imagePostModel.findById(req.params.id);
-    res.status(200).json({ message: "Image Post has been updated", Image: getImage });
+    res.status(200).json({ 
+      error : null,
+      statusCode: 200,
+      message: "Image Post has been updated", 
+      data: getImage 
+    });
   } catch (error) {
     if (req.file) {
       unlink(`${req.file.path}`, (err) => {
         if (err) throw new Error("Failed to delete file!");
       })
     }
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+      error:"INTERNAL_SERVER_ERROR",
+      statusCode: 500,
+      message:"Internal Server Error"
+    });
   }
 };
 
@@ -111,17 +161,34 @@ export const deleteImagePost = async (req, res) => {
   try {
     const getImage = await imagePostModel.findById(req.params.id);
     if (!getImage) {
-      return res.status(404).json({ message: "Image Post not found" });
+      return res.status(404).json({ 
+        error:"VALIDATION_ERROR",
+        statusCode: 404,
+        message: "Image Post not found" 
+      });
     }
     if (req.user.id != getImage.author._id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ 
+        error:"VALIDATION_ERROR",
+        statusCode: 401,
+        message: "Unauthorized" 
+      });
     }
     await imagePostModel.deleteOne(
       { _id: req.params.id, }
     );
-    res.status(200).json({ message: "Image Post has been deleted", image: getImage });
+    res.status(200).json({ 
+      error : null,
+      statusCode: 200,
+      message: "Image Post has been deleted", 
+      data: getImage 
+    });
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+      error:"INTERNAL_SERVER_ERROR",
+      statusCode: 500,
+      message:"Internal Server Error"
+    });
   }
 };
 

@@ -6,9 +6,18 @@ import {unlink,access} from "fs";
 export const getAllBlogPost = async (req, res) => {
   try {
     const blogPost = await blogPostModel.find().sort({ createdAt: -1 });
-    res.status(200).json(blogPost);
+    res.status(200).json({
+      error : null,
+      statusCode: 200,
+      message: "Blog Post Retrieved",
+      data:blogPost
+    });
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+      error:"INTERNAL_SERVER_ERROR",
+      statusCode: 500,
+      message:"Internal Server Error"
+    });
   }
 };
 
@@ -16,7 +25,11 @@ export const getAllBlogPost = async (req, res) => {
 export const createBlogPost = async (req, res) => {
   const { title, body } = req.body;
   if(!req.file){
-    return res.status(400).json({ error: "media is required" });
+    return res.status(400).json({ 
+      error: "VALIDATION_ERROR",
+      statusCode: 400,
+      message: "Please upload an image"
+    });
   }
   const media = req.protocol+"://"+req.get("host")+"/assets/images/"+req.file.filename
   // validation
@@ -26,20 +39,37 @@ export const createBlogPost = async (req, res) => {
         if (err) throw new Error("Failed to delete file!");
       })
     }
-    if (!title) return res.status(400).json({ error: "title is required" });
-    if (!body) return res.status(400).json({ error: "body is required" });
+    if (!title) return res.status(400).json({ 
+      error: "VALIDATION_ERROR",
+      statusCode: 400,
+      message: "title is required" 
+    });
+    if (!body) return res.status(400).json({ 
+      error: "VALIDATION_ERROR",
+      statusCode: 400,
+      message: "body is required" 
+    });
   }
 
   try {
     const createBlogPost = await blogPostModel.create({ title, body, media, author: req.user.id });
-    res.status(200).json({ message: "Blog Post Created", createBlogPost });
+    res.status(200).json({
+       error : null,
+       statusCode: 200,
+       message: "Blog Post Created",
+       data: createBlogPost 
+      });
   } catch (error) {
     if (req.file) {
       unlink(`${req.file.path}`, (err) => {
         if (err) throw new Error("Failed to delete file!");
       })
     }
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+      error:"INTERNAL_SERVER_ERROR",
+      statusCode: 500,
+      message:"Internal Server Error"
+    });
   }
 };
 
@@ -48,11 +78,24 @@ export const singleBlogPost = async (req, res) => {
   try {
     const singleBlogPost = await blogPostModel.findById(req.params.id);
     if (!singleBlogPost) {
-      return res.status(404).json({ message: "Blog Post not found" });
+      return res.status(404).json({
+         error:"VALIDATION_ERROR",
+         statusCode: 404,
+         message: "Blog Post not found" 
+        });
     }
-    res.status(200).json(singleBlogPost);
+    res.status(200).json({
+       error : null,
+       statusCode: 200,
+       message: "Blog Post Retrieved",
+       data:singleBlogPost
+    });
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+       error:"INTERNAL_SERVER_ERROR",
+       statusCode: 500,
+       message:"Internal Server Error"
+    });
   }
 };
 
@@ -68,15 +111,27 @@ export const editBlogPost = async (req, res) => {
         if (err) throw new Error("Failed to delete file!");
       })
     }
-    return res.status(400).json({ message: "Invalid ID" });
+    return res.status(400).json({
+       error:"VALIDATION_ERROR",
+       statusCode: 400,
+       message: "Invalid ID" 
+      });
   }
   try {
     let getBlog = await blogPostModel.findById(req.params.id).populate("author");
     if (!getBlog) {
-      return res.status(404).json({ message: "Blog Post not found" });
+      return res.status(404).json({
+         error:"VALIDATION_ERROR",
+         statusCode: 404,
+         message: "Blog Post not found" 
+        });
     }
     if (req.user.id != getBlog.author._id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({
+         error:"VALIDATION_ERROR",
+         statusCode: 401,
+         message: "Unauthorized" 
+        });
     }
     if(req.file){
       const imageName = getBlog.media.split("/").pop();
@@ -101,14 +156,23 @@ export const editBlogPost = async (req, res) => {
 
     res
       .status(200)
-      .json({ message: "Blog Post has been updated", blog: getBlog });
+      .json({
+        error : null,
+        statusCode: 200, 
+        message: "Blog Post has been updated", 
+        data: getBlog 
+      });
   } catch (error) {
     if (req.file) {
       unlink(`${req.file.path}`, (err) => {
         if (err) throw new Error("Failed to delete file!");
       })
     }
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+       error:"INTERNAL_SERVER_ERROR",
+       statusCode: 500,
+       message:"Internal Server Error"
+    });
   }
 };
 
@@ -117,16 +181,33 @@ export const deleteBlogPost = async (req, res) => {
   try {
     const getBlog = await blogPostModel.findById(req.params.id);
     if (!getBlog) {
-      return res.status(404).json({ message: "Blog Post not found" });
+      return res.status(404).json({
+         error:"VALIDATION_ERROR",
+         statusCode: 404,
+         message: "Blog Post not found" 
+        });
     }
     if (req.user.id != getBlog.author._id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({
+         error:"VALIDATION_ERROR",
+         statusCode: 401,
+         message: "Unauthorized" 
+        });
     }
     await blogPostModel.deleteOne({ _id: req.params.id });
     res
       .status(200)
-      .json({ message: "Blog Post has been deleted", blog: getBlog });
+      .json({ 
+        error : null,
+        statusCode: 200,
+        message: "Blog Post has been deleted", 
+        data: getBlog 
+      });
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+       error:"INTERNAL_SERVER_ERROR",
+       statusCode: 500,
+       message:"Internal Server Error"
+    });
   }
 };

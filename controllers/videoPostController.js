@@ -7,9 +7,18 @@ import { unlink, access } from 'fs';
 export const getAllVideoPost = async (req, res) => {
   try {
     const videoPost = await videoPostModel.find().sort({ createdAt: -1 });
-    res.status(200).json(videoPost);
+    res.status(200).json({
+      error : null,
+      statusCode: 200,
+      message: "Video Post Retrieved",
+      data:videoPost
+    });
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+      error:"INTERNAL_SERVER_ERROR",
+      statusCode: 500,
+      message:"Internal Server Error"
+    });
   }
 };
 
@@ -17,7 +26,11 @@ export const getAllVideoPost = async (req, res) => {
 export const createVideoPost = async (req, res) => {
   const { title, body } = req.body;
   if (!req.file) {
-    return res.status(400).json({ error: "media is required" });
+    return res.status(400).json({ 
+      error: "VALIDATION_ERROR",
+      statusCode: 400,
+      message: "media is required"
+     });
   }
   const media = req.protocol + "://" + req.get("host") + "/assets/videos/" + req.file.filename
   // validation
@@ -27,15 +40,32 @@ export const createVideoPost = async (req, res) => {
         if (err) throw new Error("Failed to delete file!");
       })
     }
-    if (!title) return res.status(400).json({ error: "title is required" });
-    if (!body) return res.status(400).json({ error: "body is required" });
+    if (!title) return res.status(400).json({
+      error: "VALIDATION_ERROR",
+      statusCode: 400, 
+      message: "title is required" 
+    });
+    if (!body) return res.status(400).json({ 
+      error: "VALIDATION_ERROR",
+      statusCode: 400,
+      message: "body is required" 
+    });
   }
 
   try {
     const createVideoPost = await videoPostModel.create({ title, body, media, author: req.user.id });
-    res.status(200).json({ message: "Video Post has been created", createVideoPost });
+    res.status(200).json({
+       error : null,
+       statusCode: 200, 
+       message: "Video Post has been created", 
+       data:createVideoPost 
+    });
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+      error:"INTERNAL_SERVER_ERROR",
+      statusCode: 500,
+      message:"Internal Server Error"
+    });
   }
 };
 
@@ -44,14 +74,31 @@ export const singleVideoPost = async (req, res) => {
   try {
     const singleVideoPost = await videoPostModel.findById(req.params.id);
     if (!singleVideoPost) {
-      return res.status(404).json({ message: "Video Post not found" });
+      return res.status(404).json({ 
+        error:"VALIDATION_ERROR",
+        statusCode: 404,
+        message: "Video Post not found" 
+      });
     }
     if (req.user.id != getVideo.author._id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({
+         error:"VALIDATION_ERROR",
+         statusCode: 401,
+         message: "Unauthorized" 
+        });
     }
-    res.status(200).json(singleVideoPost);
+    res.status(200).json({
+       error : null,
+       statusCode: 200,
+       message: "Video Post Retrieved",
+       data:singleVideoPost
+    });
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+      error:"INTERNAL_SERVER_ERROR",
+      statusCode: 500,
+      message:"Internal Server Error"
+    });
   }
 };
 
@@ -67,15 +114,27 @@ export const editVideoPost = async (req, res) => {
         if (err) throw new Error("Failed to delete file!");
       })
     }
-    return res.status(400).json({ message: "Invalid ID" });
+    return res.status(400).json({ 
+      error:"VALIDATION_ERROR",
+      statusCode: 400,
+      message: "Invalid ID" 
+    });
   }
   try {
     let getVideo = await videoPostModel.findById(req.params.id);
     if (!getVideo) {
-      return res.status(404).json({ message: "Video Post not found" });
+      return res.status(404).json({ 
+        error:"VALIDATION_ERROR",
+        statusCode: 404,
+        message: "Video Post not found" 
+      });
     }
     if (req.user.id != getVideo.author._id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ 
+        error:"VALIDATION_ERROR",
+        statusCode: 401,
+        message: "Unauthorized" 
+      });
     }
     if (req.file) {
       const videoName = getVideo.media.split("/").pop();
@@ -97,14 +156,23 @@ export const editVideoPost = async (req, res) => {
     );
 
     getVideo = await videoPostModel.findById(req.params.id);
-    res.status(200).json({ message: "Video Post has been updated", video: getVideo });
+    res.status(200).json({
+       error : null,
+       statusCode: 200, 
+       message: "Video Post has been updated", 
+       data: getVideo 
+      });
   } catch (error) {
     if (req.file) {
       unlink(`${req.file.path}`, (err) => {
         if (err) throw new Error("Failed to delete file!");
       })
     }
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+      error:"INTERNAL_SERVER_ERROR",
+      statusCode: 500,
+      message:"Internal Server Error"
+    });
   }
 };
 
@@ -113,14 +181,27 @@ export const deleteVideoPost = async (req, res) => {
   try {
     const deleteVideoPost = await videoPostModel.findById(req.params.id);
     if (!deleteVideoPost) {
-      return res.status(404).json({ message: "Video Post not found" });
+      return res.status(404).json({ 
+        error:"VALIDATION_ERROR",
+        statusCode: 404,
+        message: "Video Post not found" 
+      });
     }
     await videoPostModel.deleteOne(
       { _id: req.params.id }
     );
-    res.status(200).json({ message: "Video Post has been deleted", video: deleteVideoPost });
+    res.status(200).json({ 
+      error : null,
+      statusCode: 200,
+      message: "Video Post has been deleted", 
+      data: deleteVideoPost 
+    });
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+      error:"INTERNAL_SERVER_ERROR",
+      statusCode: 500,
+      message:"Internal Server Error"
+    });
   }
 };
 
