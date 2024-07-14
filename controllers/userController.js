@@ -9,23 +9,39 @@ import mongoose from "mongoose";
 export const register = async (req, res) => {
   const { error } = registerSchema.validate(req.body);
   if (error) {
-    return res.status(400).json({ message: error.details[0].message.replace(/"/g, '') });
+    return res.status(400).json({ 
+      error:"VALIDATION_ERROR",
+      statusCode: 400,
+      message: error.details[0].message.replace(/"/g, '') 
+    });
   }
 
   try {
     const { email, password } = req.body;
     // check empty email
     if (!email || email.trim() === "") {
-      return res.status(400).json({ message: "Please provide email" });
+      return res.status(400).json({ 
+        error:"VALIDATION_ERROR",
+        statusCode: 400,
+        message: "Please provide email" 
+      });
     }
     // check empty password
     if (!password || password.trim() === "") {
-      return res.status(400).json({ message: "Please provide password" });
+      return res.status(400).json({
+         error:"VALIDATION_ERROR",
+         statusCode: 400,
+         message: "Please provide password" 
+        });
     }
     // check if user exists
     let user = await userModel.findOne({ email });
     if (user) {
-      return res.status(409).json({ message: "User already in use" });
+      return res.status(409).json({
+         error:"VALIDATION_ERROR",
+         statusCode: 409,
+         message: "User already in use" 
+        });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -35,9 +51,17 @@ export const register = async (req, res) => {
       password: hashedPassword,
     });
 
-    res.status(201).json({ message: "Registered successfully" });
+    res.status(201).json({
+       error:null,
+       statusCode: 201,
+       message: "Registered successfully" 
+      });
   } catch (error) {
-    return res.status(500).send("Internal Server Error");
+    return res.status(500).json({
+      error:"INTERNAL_SERVER_ERROR",
+      statusCode: 500,
+      message:"Internal Server Error"
+    });
   }
 };
 
@@ -46,29 +70,53 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
   const { error } = loginSchema.validate(req.body);
   if (error) {
-    return res.status(400).json({ message: error.details[0].message.replace(/"/g, '') });
+    return res.status(400).json({
+       error:"VALIDATION_ERROR",
+       statusCode: 400,
+       message: error.details[0].message.replace(/"/g, '') 
+      });
   }
 
   // check empty email
   if (!email || email.trim() === "") {
-    return res.status(400).json({ message: "Please provide email" });
+    return res.status(400).json({
+       error:"VALIDATION_ERROR",
+       statusCode: 400,
+       message: "Please provide email" 
+      });
   }
   // check empty password
   if (!password || password.trim() === "") {
-    return res.status(400).json({ message: "Please provide password" });
+    return res.status(400).json({
+       error:"VALIDATION_ERROR",
+       statusCode: 400,
+       message: "Please provide password" 
+      });
   }
 
   // check if user exists
   const user = await userModel.findOne({ email });
   if (!user) {
-    return res.status(404).json({ message: "invalid email or password" });
+    return res.status(404).json({
+       error:"VALIDATION_ERROR",
+       statusCode: 404,
+       message: "invalid email or password" 
+      });
   }
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    return res.status(400).json({ message: "invalid email or password" });
+    return res.status(400).json({
+       error:"VALIDATION_ERROR",
+       statusCode: 400,
+       message: "invalid email or password" 
+      });
   }
   const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY, { expiresIn: "1d" });
-  res.status(200).json({ token });
+  res.status(200).json({
+     error:null,
+     statusCode: 200,
+     data:token 
+    });
 };
 
 //Single User
@@ -77,11 +125,24 @@ export const singleUser = async (req, res) => {
     // check if user exists
     const user = await userModel.findById(req.params.id);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+         error:"VALIDATION_ERROR",
+         statusCode: 404,
+         message: "User not found" 
+        });
     }
-    res.status(200).json(user);
+    res.status(200).json({
+       error:null,
+       statusCode: 200,
+       message: "User found successfully",
+       data:user
+    });
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+       error:"INTERNAL_SERVER_ERROR",
+       statusCode: 500,
+       message:"Internal Server Error"
+    });
   }
 };
 
@@ -99,18 +160,30 @@ export const editUser = async (req, res) => {
         })
       });
     }
-    return res.status(400).json({ message: "Invalid ID" });
+    return res.status(400).json({
+       error:"VALIDATION_ERROR",
+       statusCode: 400,
+       message: "Invalid ID" 
+      });
   }
 
   // check if user is not authorized
   if (req.user.id !== req.params.id) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({
+       error:"VALIDATION_ERROR",
+       statusCode: 401,
+       message: "Unauthorized" 
+      });
   }
 
   try {
     let user = await userModel.findOne({ _id: req.params.id });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+         error:"VALIDATION_ERROR",
+         statusCode: 404,
+         message: "User not found" 
+        });
     }
 
     // Update if user change new value
@@ -175,7 +248,12 @@ export const editUser = async (req, res) => {
     // Find Updated User
     user = await userModel.findOne({ _id: req.params.id });
 
-    res.status(200).json({ message: "User has been updated", user });
+    res.status(200).json({
+       error:null,
+       statusCode: 200,
+       message: "User has been updated",
+       data: user 
+      });
   } catch (error) {
     if (req.files) {
       Object.keys(req.files).forEach(key => {
@@ -184,6 +262,10 @@ export const editUser = async (req, res) => {
         })
       });
     }
-    res.status(500).send("Internal Server Error");
+    res.status(500).json({
+       error:"INTERNAL_SERVER_ERROR",
+       statusCode: 500,
+       message:"Internal Server Error"
+    });
   }
 };
