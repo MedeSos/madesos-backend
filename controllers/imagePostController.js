@@ -20,8 +20,15 @@ export const createImagePost = async (req, res) => {
   }
   const media = req.protocol + "://" + req.get("host") + "/assets/images/" + req.file.filename
   // validation
-  if (!title) return res.status(400).json({ error: "title is required" });
-  if (!body) return res.status(400).json({ error: "body is required" });
+  if (!title || !body) {
+    if (req.file) {
+      unlink(`${req.file.path}`, (err) => {
+        if (err) throw new Error("Failed to delete file!");
+      })
+    }
+    if (!title) return res.status(400).json({ error: "title is required" });
+    if (!body) return res.status(400).json({ error: "body is required" });
+  }
 
   try {
     const createImagePost = await imagePostModel.create({ title, body, media,author: req.user.id });

@@ -113,6 +113,13 @@ export const editUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Update if user change new value
+    const updateUser = {
+      name: name || user.name,
+      title: title || user.title,
+      description: description || user.description,
+    };
+
     if (req.files) {
       // if user change profile image
       if (req.files["profile-image"]) {
@@ -127,7 +134,8 @@ export const editUser = async (req, res) => {
             });
           })
         }
-        profileImage = req.protocol + "://" + req.get("host") + "/assets/images/" + file.filename;
+        const profileImage = req.protocol + "://" + req.get("host") + "/assets/images/" + file.filename;
+        updateUser.profileImage = profileImage;
       }
 
       // if user change background image
@@ -143,18 +151,10 @@ export const editUser = async (req, res) => {
             });
           })
         }
-        backgroundImage = req.protocol + "://" + req.get("host") + "/assets/images/" + file.filename;
+        const backgroundImage = req.protocol + "://" + req.get("host") + "/assets/images/" + file.filename;
+        updateUser.backgroundImage = backgroundImage;
       }
     }
-
-    // Update if user change new value
-    const updateUser = {
-      name: name || user.name,
-      title: title || user.title,
-      description: description || user.description,
-      profileImage: profileImage || user.profileImage,
-      backgroundImage: backgroundImage || user.backgroundImage,
-    };
 
     // Update if user change new value
     if (req.body.password && req.body.password.length > 0) {
