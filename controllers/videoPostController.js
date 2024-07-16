@@ -6,7 +6,7 @@ import { unlink, access } from 'fs';
 //get all videoPost
 export const getAllVideoPost = async (req, res) => {
   try {
-    const videoPost = await videoPostModel.find().sort({ createdAt: -1 });
+    const videoPost = await videoPostModel.find().sort({ createdAt: -1 }).populate("author", "-password -__v");
     res.status(200).json({
       error : null,
       statusCode: 200,
@@ -54,11 +54,12 @@ export const createVideoPost = async (req, res) => {
 
   try {
     const createVideoPost = await videoPostModel.create({ title, body, media, author: req.user.id });
+    const videoPost = await videoPostModel.findById(createVideoPost._id).populate("author", "-password -__v");
     res.status(200).json({
        error : null,
        statusCode: 200, 
        message: "Video Post has been created", 
-       data:createVideoPost 
+       data:videoPost 
     });
   } catch (error) {
     res.status(500).json({
@@ -72,7 +73,7 @@ export const createVideoPost = async (req, res) => {
 //single VideoPost
 export const singleVideoPost = async (req, res) => {
   try {
-    const singleVideoPost = await videoPostModel.findById(req.params.id);
+    const singleVideoPost = await videoPostModel.findById(req.params.id).populate("author", "-password -__v");
     if (!singleVideoPost) {
       return res.status(404).json({ 
         error:"VALIDATION_ERROR",
@@ -155,7 +156,7 @@ export const editVideoPost = async (req, res) => {
       }
     );
 
-    getVideo = await videoPostModel.findById(req.params.id);
+    getVideo = await videoPostModel.findById(req.params.id).populate("author", "-password -__v");
     res.status(200).json({
        error : null,
        statusCode: 200, 
@@ -179,7 +180,7 @@ export const editVideoPost = async (req, res) => {
 //delete VideoPost
 export const deleteVideoPost = async (req, res) => {
   try {
-    const deleteVideoPost = await videoPostModel.findById(req.params.id);
+    const deleteVideoPost = await videoPostModel.findById(req.params.id).populate("author", "-password -__v");
     if (!deleteVideoPost) {
       return res.status(404).json({ 
         error:"VALIDATION_ERROR",

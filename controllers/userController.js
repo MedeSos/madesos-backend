@@ -38,7 +38,7 @@ export const register = async (req, res) => {
     let user = await userModel.findOne({ email });
     if (user) {
       return res.status(409).json({
-         error:"VALIDATION_ERROR",
+        error:"USER_ALREADY_EXISTS",
          statusCode: 409,
          message: "User already in use" 
         });
@@ -97,17 +97,17 @@ export const login = async (req, res) => {
   // check if user exists
   const user = await userModel.findOne({ email });
   if (!user) {
-    return res.status(404).json({
-       error:"VALIDATION_ERROR",
-       statusCode: 404,
+    return res.status(401).json({
+      error:"UNAUTHORIZED",
+       statusCode: 401,
        message: "invalid email or password" 
       });
   }
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    return res.status(400).json({
-       error:"VALIDATION_ERROR",
-       statusCode: 400,
+    return res.status(401).json({
+      error:"UNAUTHORIZED",
+       statusCode: 401,
        message: "invalid email or password" 
       });
   }
@@ -115,7 +115,7 @@ export const login = async (req, res) => {
   res.status(200).json({
      error:null,
      statusCode: 200,
-     data:token 
+     data:{token} 
     });
 };
 
@@ -123,11 +123,11 @@ export const login = async (req, res) => {
 export const singleUser = async (req, res) => {
   try {
     // check if user exists
-    const user = await userModel.findById(req.params.id);
+    const user = await userModel.findById(req.params.id, "-password -__v");
     if (!user) {
-      return res.status(404).json({
+      return res.status(400).json({
          error:"VALIDATION_ERROR",
-         statusCode: 404,
+         statusCode: 400,
          message: "User not found" 
         });
     }
@@ -246,7 +246,7 @@ export const editUser = async (req, res) => {
     // Update User
     await userModel.updateOne({ _id: req.params.id }, updateUser);
     // Find Updated User
-    user = await userModel.findOne({ _id: req.params.id });
+    user = await userModel.findOne({ _id: req.params.id }, "-password -__v");
 
     res.status(200).json({
        error:null,

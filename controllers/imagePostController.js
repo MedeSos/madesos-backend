@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 //get all ImagePost
 export const getAllImagePost = async (req, res) => {
   try {
-    const imagePost = await imagePostModel.find().sort({ createdAt: -1 });
+    const imagePost = await imagePostModel.find().sort({ createdAt: -1 }).populate("author", "-password -__v");
     res.status(200).json(imagePost);
   } catch (error) {
     res.status(500).send("Internal Server Error");
@@ -44,11 +44,12 @@ export const createImagePost = async (req, res) => {
 
   try {
     const createImagePost = await imagePostModel.create({ title, body, media,author: req.user.id });
+    const imagePost = await imagePostModel.findById(createImagePost._id).populate("author", "-password -__v");
     res.status(200).json({
        error : null,
        statusCode: 200,
        message: "Image Post has been created", 
-       data:createImagePost 
+       data:imagePost 
       });
   } catch (error) {
     res.status(500).send({
@@ -62,7 +63,7 @@ export const createImagePost = async (req, res) => {
 //single ImagePost
 export const singleImagePost = async (req, res) => {
   try {
-    const singleImagePost = await imagePostModel.findById(req.params.id);
+    const singleImagePost = await imagePostModel.findById(req.params.id).populate("author", "-password -__v");
     if (!singleImagePost) {
       return res.status(404).json({
          error:"VALIDATION_ERROR",
@@ -134,7 +135,7 @@ export const editImagePost = async (req, res) => {
       }
     );
 
-    getImage = await imagePostModel.findById(req.params.id);
+    getImage = await imagePostModel.findById(req.params.id).populate("author", "-password -__v");
     res.status(200).json({ 
       error : null,
       statusCode: 200,
@@ -158,7 +159,7 @@ export const editImagePost = async (req, res) => {
 //delete ImagePost
 export const deleteImagePost = async (req, res) => {
   try {
-    const getImage = await imagePostModel.findById(req.params.id);
+    const getImage = await imagePostModel.findById(req.params.id).populate("author", "-password -__v");
     if (!getImage) {
       return res.status(404).json({ 
         error:"VALIDATION_ERROR",

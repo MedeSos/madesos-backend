@@ -5,7 +5,7 @@ import {unlink,access} from "fs";
 //get all BlogPost
 export const getAllBlogPost = async (req, res) => {
   try {
-    const blogPost = await blogPostModel.find().sort({ createdAt: -1 });
+    const blogPost = await blogPostModel.find().sort({ createdAt: -1 }).populate("author","-password -__v");
     res.status(200).json({
       error : null,
       statusCode: 200,
@@ -53,11 +53,13 @@ export const createBlogPost = async (req, res) => {
 
   try {
     const createBlogPost = await blogPostModel.create({ title, body, media, author: req.user.id });
+    const blogPost = await blogPostModel.findById(createBlogPost._id).populate("author", "-password -__v");
+    
     res.status(200).json({
        error : null,
        statusCode: 200,
        message: "Blog Post Created",
-       data: createBlogPost 
+       data: blogPost 
       });
   } catch (error) {
     if (req.file) {
@@ -76,7 +78,7 @@ export const createBlogPost = async (req, res) => {
 //single BlogPost
 export const singleBlogPost = async (req, res) => {
   try {
-    const singleBlogPost = await blogPostModel.findById(req.params.id);
+    const singleBlogPost = await blogPostModel.findById(req.params.id).populate("author", "-password -__v");
     if (!singleBlogPost) {
       return res.status(404).json({
          error:"VALIDATION_ERROR",
@@ -152,7 +154,7 @@ export const editBlogPost = async (req, res) => {
       }
     );
 
-    getBlog = await blogPostModel.findById(req.params.id);
+    getBlog = await blogPostModel.findById(req.params.id).populate("author", "-password -__v");
 
     res
       .status(200)
@@ -179,7 +181,7 @@ export const editBlogPost = async (req, res) => {
 //delete BlogPost
 export const deleteBlogPost = async (req, res) => {
   try {
-    const getBlog = await blogPostModel.findById(req.params.id);
+    const getBlog = await blogPostModel.findById(req.params.id).populate("author", "-password -__v");
     if (!getBlog) {
       return res.status(404).json({
          error:"VALIDATION_ERROR",
