@@ -1,5 +1,5 @@
-import { login, register } from "./../controllers/userController.js";
-import emailLowercase from "../middlewares/helperMiddleware.js";
+import { login, register } from "../../controllers/userController.js";
+import emailLowercase from "../../middlewares/helperMiddleware.js";
 import express from "express";
 
 const router = express.Router();
