@@ -1,16 +1,34 @@
 import mongoose from "mongoose";
 import blogPostModel from "../models/blogPost.js";
 import {unlink,access} from "fs";
+import path from "path";
+const __dirname = path.resolve();
 
 //get all BlogPost
 export const getAllBlogPost = async (req, res) => {
+  let blogPost;
   try {
-    const blogPost = await blogPostModel.find().sort({ createdAt: -1 }).populate("author","-password -__v");
+    if(req.query.type){
+      if(req.query.type!=="current") return res.status(400).json({
+        error:"VALIDATION_ERROR",
+        statusCode: 400,
+        message: "Invalid query parameter"
+      });
+      // get parameter
+      blogPost = await blogPostModel.find({ author: req.user.id })
+      .sort({ createdAt: -1 })
+      .populate("author","-password -__v");
+    }else{
+      blogPost = await blogPostModel.find().sort({ createdAt: -1 }).populate("author","-password -__v");
+    }
     res.status(200).json({
       error : null,
       statusCode: 200,
       message: "Blog Post Retrieved",
-      data:blogPost
+      data:{
+        count:blogPost.length,
+        blogs:blogPost
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -180,6 +198,14 @@ export const editBlogPost = async (req, res) => {
 
 //delete BlogPost
 export const deleteBlogPost = async (req, res) => {
+  // check valid id
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({
+      error: "VALIDATION_ERROR",
+      statusCode: 400,
+      message: "Invalid ID"
+    });
+  }
   try {
     const getBlog = await blogPostModel.findById(req.params.id).populate("author", "-password -__v");
     if (!getBlog) {
@@ -196,7 +222,15 @@ export const deleteBlogPost = async (req, res) => {
          message: "Unauthorized" 
         });
     }
+    const imageName = getBlog.media.split("/").pop();
+    const filePath = path.join(__dirname, `/public/uploads/images/${imageName}`);
     await blogPostModel.deleteOne({ _id: req.params.id });
+    access(filePath, (err) => {
+      if (err) throw new Error("File not found!");
+      unlink(filePath, (err) => {
+        if (err) throw new Error("Failed to delete file!");
+      });
+    })
     res
       .status(200)
       .json({ 

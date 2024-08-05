@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
-const allowList = JSON.parse(process.env.CLIENT_URL);
+let allowList = process.env.CLIENT_URL;
+allowList = allowList.split(",");
 
 export const corsOptions = {
   origin: (origin, callback) => {

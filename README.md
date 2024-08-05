@@ -22,7 +22,7 @@ Configure the value of the constant that has been provided in the .env file with
 DB_URI=mongodb://localhost:27017/db_name 
 PORT=5000                                
 SECRET_KEY=secretkey                     
-CLIENT_URL=["http://example.com"]        
+CLIENT_URL=http://example.com        
 ```
 #### DB_URI 
 you can change the url or Database Name
@@ -34,9 +34,9 @@ you can set what ever port you want
 Default JWT is secretkey, change to random string for secure
 
 #### CLIENT_URL
-This part if you want to allow your API to client, you can give more than one client url to access your API with array url
+This part if you want to allow your API to client, you can give more than one client url to access your API, example:
 ```shell
-CLIENT_URL=["http://example.com","mydomain.com"]
+CLIENT_URL= http://example.com,https://mydomain.com
 ```
 
 Make sure your database is running (if use local mongodb), and you can run the project

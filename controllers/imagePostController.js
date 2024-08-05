@@ -1,14 +1,42 @@
 import imagePostModel from './../models/imagePost.js';
 import { unlink, access } from 'fs';
 import mongoose from 'mongoose';
+import path from 'path';
+
+const __dirname = path.resolve();
 
 //get all ImagePost
 export const getAllImagePost = async (req, res) => {
+  let imagePost;
   try {
-    const imagePost = await imagePostModel.find().sort({ createdAt: -1 }).populate("author", "-password -__v");
-    res.status(200).json(imagePost);
+    if(req.query.type){
+      if(req.query.type!=="current") return res.status(400).json({
+        error:"VALIDATION_ERROR",
+        statusCode: 400,
+        message: "Invalid query parameter"
+      });
+      // get parameter
+      imagePost = await imagePostModel.find({ author: req.user.id })
+      .sort({ createdAt: -1 })
+      .populate("author", "-password -__v");
+    }else{
+        imagePost = await imagePostModel.find().sort({ createdAt: -1 }).populate("author", "-password -__v");
+    }
+    res.status(200).json({
+      error: null,
+      statusCode: 200,
+      message: "Blog Image Retrieved",
+      data:{
+        count:imagePost.length,
+        blogs:imagePost
+      }
+    });
   } catch (error) {
-    res.status(500).send("Internal Server Error");
+    res.status(500).send({
+      error: "INTERNAL_SERVER_ERROR",
+      statusCode: 500,
+      message: "Internal Server Error"
+    });
   }
 };
 
@@ -158,6 +186,15 @@ export const editImagePost = async (req, res) => {
 
 //delete ImagePost
 export const deleteImagePost = async (req, res) => {
+  // check valid id
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({
+      error: "VALIDATION_ERROR",
+      statusCode: 400,
+      message: "Invalid ID"
+    });
+  }
+
   try {
     const getImage = await imagePostModel.findById(req.params.id).populate("author", "-password -__v");
     if (!getImage) {
@@ -174,9 +211,18 @@ export const deleteImagePost = async (req, res) => {
         message: "Unauthorized" 
       });
     }
+
+    const imageName = getImage.media.split("/").pop();
+    const imagePath = path.join(__dirname,`/public/uploads/images/${imageName}`);
     await imagePostModel.deleteOne(
       { _id: req.params.id, }
     );
+    access(imagePath, (err) => {
+      if (err) throw new Error("Image not found!");
+      unlink(imagePath, (err) => {
+        if (err) throw new Error("Failed to delete file!");
+      })
+    })
     res.status(200).json({ 
       error : null,
       statusCode: 200,

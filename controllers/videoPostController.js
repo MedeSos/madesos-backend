@@ -1,17 +1,35 @@
 import mongoose from 'mongoose';
 import videoPostModel from './../models/videoPost.js';
 import { unlink, access } from 'fs';
+import path from 'path';
+const __dirname = path.resolve();
 
 
 //get all videoPost
 export const getAllVideoPost = async (req, res) => {
+  let videoPost;
   try {
-    const videoPost = await videoPostModel.find().sort({ createdAt: -1 }).populate("author", "-password -__v");
+    if(req.query.type){
+      if(req.query.type!=="current") return res.status(400).json({
+        error:"VALIDATION_ERROR",
+        statusCode: 400,
+        message: "Invalid query parameter"
+      });
+      // get parameter
+      videoPost = await videoPostModel.find({ author: req.user.id })
+      .sort({ createdAt: -1 })
+      .populate("author", "-password -__v");
+    }else{
+      videoPost = await videoPostModel.find().sort({ createdAt: -1 }).populate("author", "-password -__v");
+    }
     res.status(200).json({
       error : null,
       statusCode: 200,
-      message: "Video Post Retrieved",
-      data:videoPost
+      message: "Blog Video Retrieved",
+      data:{
+        count:videoPost.length,
+        blogs:videoPost
+      }
     });
   } catch (error) {
     res.status(500).json({
@@ -179,6 +197,14 @@ export const editVideoPost = async (req, res) => {
 
 //delete VideoPost
 export const deleteVideoPost = async (req, res) => {
+  // check valid id
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({
+      error: "VALIDATION_ERROR",
+      statusCode: 400,
+      message: "Invalid ID"
+    });
+  }
   try {
     const deleteVideoPost = await videoPostModel.findById(req.params.id).populate("author", "-password -__v");
     if (!deleteVideoPost) {
@@ -188,9 +214,17 @@ export const deleteVideoPost = async (req, res) => {
         message: "Video Post not found" 
       });
     }
+    const videoName = deleteVideoPost.media.split("/").pop();
+    const videoPath = path.join(__dirname, `/public/uploads/videos/${videoName}`);
     await videoPostModel.deleteOne(
       { _id: req.params.id }
     );
+    access(videoPath, (err) => {
+      if (err) throw new Error("File not found!");
+      unlink(videoPath, (err) => {
+        if (err) throw new Error("Failed to delete file!");
+      });
+    });
     res.status(200).json({ 
       error : null,
       statusCode: 200,
